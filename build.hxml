@@ -1,0 +1,20 @@
+-lib mo
+-lib utest
+-lib tink_json
+
+-cp src
+-cp tests
+
+-main Main
+
+-resource res/tests.json@tests.json
+-resource res/css/haxe.io.css@haxe.io.css
+-resource res/css/normalize.css@normalize.css
+
+--each
+
+-neko bin/css.n
+
+--next
+
+-js bin/css.js

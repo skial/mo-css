@@ -1,0 +1,16 @@
+{
+  "name": "mo-css",
+  "license": "MIT",
+  "classPath": "src",
+  "tags": ["uhu", "uhx", "mo", "lexer", "ast", "parser", "css"],
+  "description": "A CSS lexer and parser.",
+  "contributors": ["skial"],
+  "releasenote": "Initial Release",
+  "version": "0.0.1-alpha",
+  "url": "https://github.com/skial/mo-css",
+  "dependencies": {
+	"mo": "",
+    "utest": "",
+    "tink_json", ""
+  }
+}

@@ -1,0 +1,157 @@
+{
+    "typeDeclaration": {
+        "test": "div { display: block; }",
+        "expected": {
+            "pretty": "div {\r\n\tdisplay: block;\r\n}",
+            "compact": "div{display:block;}"
+        }
+    },
+    "typeDeclaration_Newline": {
+        "test": "div,\nimg { display: block; }",
+        "expected": {
+            "pretty": "div,\r\nimg {\r\n\tdisplay: block;\r\n}",
+            "compact": "div,img{display:block;}"
+        }
+    },
+    "typeDeclaration_NewlineCarriageTab": {
+        "test": "div,\r\nimg\t{ display: block; }",
+        "expected": {
+            "pretty": "div,\r\nimg {\r\n\tdisplay: block;\r\n}",
+            "compact": "div,img{display:block;}"
+        }
+    },
+    "idDeclaration": {
+        "test": "div,\r\nimg\t{ display: block; }"
+    },
+    "idDeclaration_multi": {
+        "test": "#a, #b, #c { d: e; }"
+    },
+    "idDeclaration_child": {
+        "test": "#a > #b { c: d; }"
+    },
+    "classDeclaration": {
+        "test": ".class { display: block; }",
+        "expected": {
+            "pretty": ".class {\r\n\tdisplay: block;\r\n}",
+            "compact": ".class{display:block;}"
+        }
+    },
+    "classDeclaration_Newline": {
+        "test": ".class1\n.class2 { display: block; }",
+        "expected": {
+            "pretty": ".class1.class2 {\r\n\tdisplay: block;\r\n}",
+            "compact": ".class1.class2{display:block;}"
+        }
+    },
+    "classDeclaration_NewlineCarriageTab": {
+        "test": ".class1\r\n\t.class2 { display: block; }"
+    },
+    "comment": {
+        "test": "/* div http://url.org/index.php?f=1&g=11#blob !@?& */"
+    },
+    "comment_Multiline": {
+        "test": "/*\r\nrgb(241,89,34) - http://www.colorhexa.com/f15922\r\ncomplementary colour \r\nrgb(34,186,241) - http://www.colorhexa.com/22baf1\r\n*/"
+    },
+    "comment_MultiAsterisk": {
+        "test": "/**\r\n* something\r\n\t* else\r\n * again\r\n*/"
+    },
+    "commentTypeClass": {
+        "test": "/* comment1 */\r\n\r\nimg,\r\n.class {\r\n\tdisplay: block;\r\n}/*comment2*/"
+    },
+    "child": {
+        "test": "a > b { display: block; }"
+    },
+    "singleCharacters": {
+        "test": "a { b: 1; }"
+    },
+    "decimalValue": {
+        "test": "a { b: 1.1; }"
+    },
+    "stringValue": {
+        "test": "a { b: \"/unicode0123456789!?\"£$\"; }"
+    },
+    "multiValue": {
+        "test": "a { b: 1, 2, 3; }"
+    },
+    "attributeSelector": {
+        "test": "a[b=\"/\"] { c: d; }"
+    },
+    "declarationComment": {
+        "test": "a { /*c1*/b: 1;/*c:2;*/ }"
+    },
+    "universalSelector": {
+        "test": "* { a:b; }"
+    },
+    "notPseduo": {
+        "test": "*:not([type]) { a:b; }"
+    },
+    "cssVariables": {
+        "test": ".class { --my-colour: red;\r\ncolor: var(--my-colour); }"
+    },
+    "commentInSelector": {
+        "test": "a, /* 1 */ b { c:d; }"
+    },
+    "calc": {
+        "test": "a { height: calc(100px - 2em); }"
+    },
+    "atRule": {
+        "test": "@media all and (min-width: 1156px) { a { b:c; } }"
+    },
+    "atRule_MultiExpr": {
+        "test": "@media all and (max-width: 699px) and (min-width: 520px), (min-width: 1151px) {a {b:c;} }"
+    },
+    "ruleSet_Multi": {
+        "test": "a {b:c;} d {e:f;}"
+    },
+    "classDeclaration_SpacedRuleSet": {
+        "test": ".a .b .c .d { c:d; }"
+    },
+    "classDeclaration_ChainedRuleSet": {
+        "test": ".a.b.c.d { c:d; }"
+    },
+    "pseudo_JoinedRuleSet": {
+        "test": "a:first-child { b:c; }"
+    },
+    "attribute_JoinedRuleSet": {
+        "test": "a[name] {b:c;}"
+    },
+    "attribute_Multiple": {
+        "test": "a[one=hello][two*=\"bob\"][three|=\"123\"] { a:b; }"
+    },
+    "pseudo_ExprInExpr_1": {
+        "test": "a:not(:has(ab, ac, ad)) { a:b; }"
+    },
+    "pseudo_ExprInExpr_2": {
+        "test": "style, link:not([rel=\"import\"]), meta, script[async], script[defer] { a:b; }"
+    },
+    "pseudo_ExprInExpr_Silly": {
+        "test": "a:not(:has(ab, ac, :not(bb, bc:has(cb cc, cd), bd))) { a:b; }"
+    },
+    "relativeSelector_Child": {
+        "test": "> #A {a:b;}"
+    },
+    "relativeSelector_Adjacent": {
+        "test": "+ #A {a:b;}"
+    },
+    "relativeSelector_General": {
+        "test": "~ #A {a:b;}"
+    },
+    "relativeSelector_Group": {
+        "test": "> #ID, + .class { a:b; }"
+    },
+    "escapedSequence_SingleCharacter": {
+        "test": "div\\+ { a: b; }"
+    },
+    "escapedSequence_FullCharacters": {
+        "test": "div\\!\\#\\$\\%\\&\\'\\(\\)\\*\\+\\,\\-\\.\\/\\:\\;\\<\\=\\>\\?\\@\\[\\\\\\]\\^\\`\\{\\|\\}\\~ { a: b; }"
+    },
+    "escapedSequence_ShortUnicode": {
+        "test": "div\\2b { a: b; }"
+    },
+    "escapedSequence_FullUnicode": {
+        "test": "div\\00002b { a: b; }"
+    },
+    "escapedSequence_Attribute": {
+        "test": "div[name\\+] { a: b; }"
+    }
+}
