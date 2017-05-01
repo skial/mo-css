@@ -32,7 +32,7 @@ enum CssSelectors {
 	Attribute(name:String, type:AttributeType, value:String);
 	Class(names:Array<String>);
 	ID(name:String);
-	Pseudo(name:String, expr:CssSelectors);
+	Pseudo(name:String, ?expr:CssSelectors);
 	Combinator(selector:CssSelectors, next:CssSelectors, type:CombinatorType);
 }
 
@@ -126,7 +126,7 @@ enum NthExpressions {
 		} catch (e:Eof) {
 			
 		} catch (e:Dynamic) {
-			trace( e );
+			//trace( e );
 		}
 		
 		return make(rule.trim(), tokens);
@@ -144,7 +144,7 @@ enum NthExpressions {
 			}
 			tokens.push( token );
 		} catch (e:Eof) { } catch (e:Dynamic) {
-			trace( e );
+			//trace( e );
 		}
 		
 		Comment( tokens.join('').trim() );
@@ -221,10 +221,10 @@ enum NthExpressions {
 		} catch (e:Eof) {
 			
 		} catch (e:Dynamic) {
-			trace( e );
+			/*trace( e );
 			trace( lexer.source );
 			trace( lexer.input );
-			trace( lexer.input.readString(0, lexer.pos) );
+			trace( lexer.input.readString(0, lexer.pos) );*/
 		}
 
 		//trace( tokens );
@@ -259,7 +259,7 @@ enum NthExpressions {
             result = t.length > 1 ? CssSelectors.Group(t) : t[0];
 
         }
-		
+		//trace(result);
 		return result;
 	}
 	
@@ -318,13 +318,13 @@ enum NthExpressions {
 		} );
 	},
 	//'::?([$ident]+$escaped*)+[ ]*(\\([^\\(\\)]*\\))?($combinator)' => {
-    '::?([$ident]+$escaped*)+[ ]*\\(' => {
+    '::?([$ident]+$escaped*)+[ ]*\\(?' => {
 		var current = lexer.current.trim();
         //trace( current );
-		var expression = '';
+		var expression = false;
 		var index = current.length;
 		var lindex = current.length;
-        current = current.substring(0, current.length-1);
+        if (expression = current.endsWith('(')) current = current.substring(0, current.length-1);
 		
 		/*if ((lindex = current.lastIndexOf(')')) > -1) {
 			index = current.indexOf('(');
@@ -343,20 +343,24 @@ enum NthExpressions {
 			
 		} catch (e:Any) {
 			//untyped trace( lexer.input.readString( lexer.curPos().pmin, lexer.curPos().pmax ) );
-			trace( e );
+			/*trace( e );
             trace( lexer.source );
 			trace( lexer.input );
-			trace( lexer.input.readString(0, lexer.pos) );
+			trace( lexer.input.readString(0, lexer.pos) );*/
             //@:privateAccess lexer.pos--;
 			
 		}
-		
+
 		//trace(tokens);
-        var closing = try lexer.token( pseudoCombinator ) catch(e:Any) {
-            trace(e);
-            -1;
-        };
-        trace(closing);
+
+		if (expression) {
+			 var closing = try lexer.token( pseudoCombinator ) catch(e:Any) {
+				//trace(e);
+				-1;
+			};
+			//trace(closing);
+		}
+       
 		handleSelectors(lexer, function(i) {
 			if (i > -1 && i < index) {
 				index = i;
@@ -394,25 +398,82 @@ enum NthExpressions {
 		(tokens.length == 1)? tokens[0] : CssSelectors.Group(tokens);
 	},*/
 	'>' => {
-		!scoped
-			? lexer.token( selectors )
-			: Combinator(Pseudo('scope', Group([])), lexer.token( selectors ), Child);
+		if (!scoped) {
+			lexer.token( selectors );
+
+		} else {
+			var token = lexer.token( selectors );
+			var next = token;
+			var remainder = [];
+
+			switch token {
+				case CssSelectors.Group(tokens):
+					next = tokens[0];
+					for (i in 1...tokens.length) remainder.push(tokens[i]);
+
+				case _:
+
+			}
+
+			var result = Combinator(Pseudo('scope'), next, Child);
+
+			remainder.length > 0 ? CssSelectors.Group([result].concat(remainder)) : result;
+			
+		}
 	},
 	'\\+' => {
-		!scoped
-			? Pseudo('not', Universal)
-			: Combinator(Pseudo('scope', Group([])), lexer.token( selectors ), Adjacent);
+		if (!scoped) {
+			lexer.token( selectors );
+
+		} else {
+			var token = lexer.token( selectors );
+			var next = token;
+			var remainder = [];
+
+			switch token {
+				case CssSelectors.Group(tokens):
+					next = tokens[0];
+					for (i in 1...tokens.length) remainder.push(tokens[i]);
+
+				case _:
+
+			}
+
+			var result = Combinator(Pseudo('scope'), next, Adjacent);
+
+			remainder.length > 0 ? CssSelectors.Group([result].concat(remainder)) : result;
+			
+		}
 	},
 	'~' => {
-		!scoped
-			? Pseudo('not', Universal)
-			: Combinator(Pseudo('scope', Group([])), lexer.token( selectors ), General);
+		if (!scoped) {
+			lexer.token( selectors );
+
+		} else {
+			var token = lexer.token( selectors );
+			var next = token;
+			var remainder = [];
+
+			switch token {
+				case CssSelectors.Group(tokens):
+					next = tokens[0];
+					for (i in 1...tokens.length) remainder.push(tokens[i]);
+
+				case _:
+
+			}
+
+			var result = Combinator(Pseudo('scope'), next, General);
+
+			remainder.length > 0 ? CssSelectors.Group([result].concat(remainder)) : result;
+			
+		}
 	},
 	]);
 
     public static var pseudoCombinator = Mo.rules([
     '\\)?$combinator$comma' => {
-        trace(lexer.current);
+        //trace(lexer.current);
         -1;
     }
     ]);
@@ -471,7 +532,7 @@ enum NthExpressions {
 		} catch (e:Eof) {
 			
 		} catch (e:Dynamic) {
-			trace( e );
+			//trace( e );
 		}
 		
 		tokens[0];
@@ -516,10 +577,10 @@ enum NthExpressions {
 			
 		} catch (e:Dynamic) {
 			//untyped trace( lexer.input.readString( lexer.curPos().pmin, lexer.curPos().pmax ) );
-			trace( e );
+			/*trace( e );
 			trace( name );
 			trace( tokens );
-			trace( value.readString(0, value.length) );
+			trace( value.readString(0, value.length) );*/
 		}
 		
 		return tokens;

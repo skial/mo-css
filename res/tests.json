@@ -21,7 +21,7 @@
         }
     },
     "idDeclaration": {
-        "test": "div,\r\nimg\t{ display: block; }"
+        "test": "#a { b: c; }"
     },
     "idDeclaration_multi": {
         "test": "#a, #b, #c { d: e; }"

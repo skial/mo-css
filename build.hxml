@@ -11,6 +11,10 @@
 -resource res/css/haxe.io.css@haxe.io.css
 -resource res/css/normalize.css@normalize.css
 
+-dce full
+
+-D analyzer-optimize
+
 --each
 
 -neko bin/css.n

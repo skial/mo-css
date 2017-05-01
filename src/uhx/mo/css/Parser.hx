@@ -27,7 +27,7 @@ class Parser {
 		} catch (e:Eof) {
 			
 		} catch (e:Dynamic) {
-			//untyped console.log( lexer.input.readString( lexer.curPos().pmin, lexer.curPos().pmax ) );
+			
 		}
 		
 		return tokens;
