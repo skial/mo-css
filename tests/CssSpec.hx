@@ -544,10 +544,11 @@ using StringTools;
 		
 		switch (t[0]) {
 			case Keyword(RuleSet(s, t)):
+				trace( s );
 				Assert.isTrue( s.match( Combinator(
 					Universal,
 					//Pseudo('not', '[type]'),
-                    Pseudo('not', Attribute('type', -1, '')),
+                    Pseudo('not', Combinator(Universal, Attribute('type', -1, ''), None)),
 					None
 				) ) );
 				Assert.equals( 1, t.length );
@@ -796,7 +797,9 @@ using StringTools;
 				Assert.isTrue( s.match( Combinator(
 					CssSelectors.Type('a'),
 					//Pseudo('not', ':has(ab, ac, ad)'),
-                    Pseudo('not', Pseudo('has', Group([Type('ab'), Type('ac'), Type('ad')]))),
+                    Pseudo('not', 
+						Combinator(Universal, Pseudo('has', Group([Type('ab'), Type('ac'), Type('ad')])), None)
+					),
 					None
 				) ) );
 				
@@ -816,7 +819,8 @@ using StringTools;
 				Assert.isTrue( s.match( 
 					Group( [ 
 						//Type('style'), Combinator(Type('link'), Pseudo('not', '[rel="import"]'), None),
-                        Type('style'), Combinator(Type('link'), Pseudo('not', Attribute('rel', Exact, 'import')), None),
+                        Type('style'), 
+						Combinator(Type('link'), Pseudo('not', Combinator(Universal, Attribute('rel', Exact, 'import'), None)), None),
 						Type('meta'), Combinator(Type('script'), Attribute('async', Unknown, ''), None),
 						Combinator(Type('script'), Attribute('defer', Unknown, ''), None)
 					] )
@@ -835,31 +839,35 @@ using StringTools;
 		
 		switch (t[0]) {
 			case Keyword(RuleSet(s, _)):
-                //trace(s);
+                trace(s);
 				Assert.isTrue( s.match( Combinator(
 					Type('a'),
 					//Pseudo('not', ':has(ab, ac, :not(bb, bc:has(cb cc, cd), bd))'),
                     Pseudo('not', 
-                        Pseudo('has', 
-                            Group([
-                                Type('ab'), 
-                                Type('ac'), 
-                                Pseudo('not', 
-                                    Group([
-                                        Type('bb'), 
-                                        Combinator(
-                                            Type('bc'),
-                                            Pseudo('has', Group([
-                                                Combinator(Type('cb'), Type('cc'), Descendant), 
-                                                Type('cd')
-                                            ])),
-                                            None
-                                        ), 
-                                        Type('bd')
-                                    ])
-                                ),
-                            ])
-                        )
+						Combinator(
+							Universal,
+							Pseudo('has', 
+								Group([
+									Type('ab'), 
+									Type('ac'), 
+									Pseudo('not', 
+										Group([
+											Type('bb'), 
+											Combinator(
+												Type('bc'),
+												Pseudo('has', Group([
+													Combinator(Type('cb'), Type('cc'), Descendant), 
+													Type('cd')
+												])),
+												None
+											), 
+											Type('bd')
+										])
+									),
+								])
+							),
+							None
+						)
                     ),
 					None
 				) ) );

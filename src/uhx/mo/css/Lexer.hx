@@ -32,7 +32,7 @@ enum CssSelectors {
 	Attribute(name:String, type:AttributeType, value:String);
 	Class(names:Array<String>);
 	ID(name:String);
-	Pseudo(name:String, ?expr:CssSelectors);
+	Pseudo<T>(name:String, ?expr:T);
 	Combinator(selector:CssSelectors, next:CssSelectors, type:CombinatorType);
 }
 
@@ -320,54 +320,72 @@ enum NthExpressions {
 	//'::?([$ident]+$escaped*)+[ ]*(\\([^\\(\\)]*\\))?($combinator)' => {
     '::?([$ident]+$escaped*)+[ ]*\\(?' => {
 		var current = lexer.current.trim();
+		var name = current.substring(1);
         //trace( current );
 		var expression = false;
 		var index = current.length;
 		var lindex = current.length;
-        if (expression = current.endsWith('(')) current = current.substring(0, current.length-1);
-		
-		/*if ((lindex = current.lastIndexOf(')')) > -1) {
-			index = current.indexOf('(');
-			expression = current.substring(index + 1, lindex);
-            trace(expression);
-		}
+        if (expression = name.endsWith('(')) name = name.substring(0, name.length-1);
 
-        */
-
-        //var lexer = new Css(value, name);
 		var tokens = [];
 		
+		var inner:Ruleset<EnumValue> = name.startsWith('nth') ? cast nthExpression : cast selectors;
 		try while (true) {
-			tokens.push( lexer.token( selectors ) );
+			tokens.push( lexer.token( inner ) );
+
 		} catch (e:Eof) {
 			
 		} catch (e:Any) {
-			//untyped trace( lexer.input.readString( lexer.curPos().pmin, lexer.curPos().pmax ) );
 			/*trace( e );
             trace( lexer.source );
 			trace( lexer.input );
 			trace( lexer.input.readString(0, lexer.pos) );*/
-            //@:privateAccess lexer.pos--;
 			
 		}
-
-		//trace(tokens);
-
+		
 		if (expression) {
 			 var closing = try lexer.token( pseudoCombinator ) catch(e:Any) {
-				//trace(e);
 				-1;
 			};
-			//trace(closing);
+			
 		}
        
 		handleSelectors(lexer, function(i) {
+			var expr:EnumValue = if (name.startsWith('nth')) {
+				switch (cast tokens[0]:NthExpressions) {
+					case Notation(a, b, isNegative):
+						if (a == 0 && b > 0) {
+							Index(b);
+							
+						} else {
+							tokens[0];
+							
+						}
+						
+					case _:
+						tokens[0];
+				}
+
+			} else {
+				var tokens:Array<CssSelectors> = cast tokens;
+				for (i in 0...tokens.length) switch(tokens[i]) {
+					case Attribute(_, _, _) | Pseudo(_, _) | 
+					Combinator(Attribute(_, _, _), _, _) | Combinator(Pseudo(_, _), _, _):
+						tokens[i] = Combinator(Universal, tokens[i], None);
+						
+					case _:
+						
+				}
+				tokens.length > 1 ? CssSelectors.Group(tokens) : tokens[0];
+
+			}
+
 			if (i > -1 && i < index) {
 				index = i;
 			}
 			//trace( i, index, lindex, current, current.substring(1) );
 			//return Pseudo(current.substring(1, index).trim(), expression);
-            return Pseudo(current.substring(1), tokens.length > 1 ? Group(tokens) : tokens[0]);
+            return Pseudo(name, expr);
 		} );
 	},
 	'\\[[$s]*([$ident]+$escaped*)+[$s]*([=~$\\*\\^\\|]+[$s]*[^\r\n\\[\\]]+)?\\]$combinator$comma' => {
@@ -495,7 +513,7 @@ enum NthExpressions {
 	
 	public static var declarations = Mo.rules([
 	'[$ident]+[$s]*:' => {
-		untyped lexer.pos--;
+		@:privateAccess lexer.pos--;
 		lexer.current.substring(0, lexer.current.length - 1).trim();
 	},
 	':[$s]*[^;]+;' => lexer.current.substring(1, lexer.current.length-1).trim(),

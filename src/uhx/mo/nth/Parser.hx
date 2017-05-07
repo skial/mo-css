@@ -5,7 +5,7 @@ import byte.ByteData;
 import uhx.mo.css.Lexer;
 import uhx.mo.css.Lexer.NthExpressions;
 
-class NthExpression {
+class Parser {
 	
 	public function new() {
 		
