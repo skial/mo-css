@@ -544,7 +544,7 @@ using StringTools;
 		
 		switch (t[0]) {
 			case Keyword(RuleSet(s, t)):
-				trace( s );
+				//trace( s );
 				Assert.isTrue( s.match( Combinator(
 					Universal,
 					//Pseudo('not', '[type]'),
@@ -839,7 +839,7 @@ using StringTools;
 		
 		switch (t[0]) {
 			case Keyword(RuleSet(s, _)):
-                trace(s);
+                //trace(s);
 				Assert.isTrue( s.match( Combinator(
 					Type('a'),
 					//Pseudo('not', ':has(ab, ac, :not(bb, bc:has(cb cc, cd), bd))'),

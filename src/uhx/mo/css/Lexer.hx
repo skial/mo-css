@@ -2,7 +2,6 @@ package uhx.mo.css;
 
 import haxe.io.Eof;
 import uhx.mo.Token;
-import uhx.lexer.Css;
 import hxparse.Lexer;
 import byte.ByteData;
 import hxparse.Ruleset;
@@ -586,7 +585,7 @@ enum NthExpressions {
 	]);
 	
 	private static function parse<T>(value:ByteData, name:String, rule:Ruleset<T>):Array<T> {
-		var lexer = new Css(value, name);
+		var lexer = new Lexer(value, name);
 		var tokens = [];
 		
 		try while (true) {
