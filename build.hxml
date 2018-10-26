@@ -11,8 +11,8 @@
 -resource res/css/haxe.io.css@haxe.io.css
 -resource res/css/normalize.css@normalize.css
 
+#-debug
 -dce full
-
 -D analyzer-optimize
 
 --each
@@ -21,4 +21,9 @@
 
 --next
 
+-lib hxnodejs
 -js bin/css.js
+
+--next
+
+-hl bin/css.hl
