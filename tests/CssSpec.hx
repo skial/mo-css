@@ -804,7 +804,8 @@ using StringTools;
                     None
                 ) ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -827,7 +828,8 @@ using StringTools;
                     ] )
                 ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -873,7 +875,8 @@ using StringTools;
                     None
                 ) ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -894,7 +897,8 @@ using StringTools;
                     Combinator( Universal, Combinator( Pseudo( 'scope' ), ID( 'A' ), Child ), None )
                 ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -913,7 +917,8 @@ using StringTools;
                     Combinator( Universal, Combinator( Pseudo( 'scope' ), ID( 'A' ), Adjacent ), None )
                 ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -932,7 +937,8 @@ using StringTools;
                     Combinator( Universal, Combinator( Pseudo( 'scope' ), ID( 'A' ), General ), None )
                 ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -957,7 +963,8 @@ using StringTools;
                     ] )
                 ) );
                 
-            case _:
+            case x:
+                trace( x );
                 Assert.fail();
                 
         }
@@ -1014,11 +1021,15 @@ using StringTools;
                         Assert.equals( 'a', n );
                         Assert.equals( 'b', v );
                         
-                    case _:
+                    case x:
+                        trace( x );
+                        Assert.fail();
                         
                 }
                 
-            case _:
+            case x:
+                trace( x );
+                Assert.fail();
                 
         }
     }
