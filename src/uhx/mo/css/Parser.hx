@@ -33,7 +33,7 @@ class Parser {
         return tokens;
     }
     
-    public function printHTML(token:Token<CssKeywords>, ?tag:String = 'span'):String {
+    /*public function printHTML(token:Token<CssKeywords>, ?tag:String = 'span'):String {
         var css = token.toCSS();
         var result = '<$tag class="$css">' +
         (switch (token) {
@@ -61,7 +61,7 @@ class Parser {
         + '</$tag>';
         
         return result;
-    }
+    }*/
     
     public function printString(token:Token<CssKeywords>, compress:Bool = false):String {
         var result = '';
