@@ -354,10 +354,8 @@ using StringTools;
                 
         }
         
-        var html = [for (i in t) parser.printHTML( i )].join('\r\n');
         var string = [for (i in t) parser.printString( i )].join('\r\n');
         
-        //Assert.equals( '<span class="comment"><wbr>&shy;/*comment1*//*</span>\r\n<span class="keyword ruleset">img,\r\n.class {\r\n\t<span class="keyword declaration">display: block;</span>\r\n}</span>\r\n<span class="comment"><wbr>&shy;/*comment2*//*</span>', html );
         Assert.equals( '/*comment1*/\r\nimg,\r\n.class {\r\n\tdisplay: block;\r\n}\r\n/*comment2*/', string );
     }
     
@@ -489,12 +487,6 @@ using StringTools;
             case _:
                 
         }
-        
-        var html = parser.printHTML( t[0] );
-        var string = parser.printString( t[0] );
-        
-        //Assert.equals( '<span class="keyword ruleset">a[b="/"] {\r\n\t<span class="keyword declaration">c: d;</span>\r\n}</span>', html );
-        //Assert.equals( 'a[b="/"] {\r\n\tc: d;\r\n}', string );
     }
     
     public function testDeclarationComment() {

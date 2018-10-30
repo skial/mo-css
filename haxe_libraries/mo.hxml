@@ -1,6 +1,5 @@
-# @install: lix --silent download "https://github.com/skial/mo/archive/127b738aaf28a910433c64413b8eb9c05be10dd5.tar.gz" into mo/0.0.1-alpha/github/127b738aaf28a910433c64413b8eb9c05be10dd5
 -D mo=0.0.1-alpha
--cp ${HAXESHIM_LIBCACHE}/mo/0.0.1-alpha/github/127b738aaf28a910433c64413b8eb9c05be10dd5/src
-
+# @install: lix --silent download "gh://github.com/skial/mo#88eecd9339079f72c26ce2040e7ddf3ea70d5240" into mo/0.0.1-alpha/github/88eecd9339079f72c26ce2040e7ddf3ea70d5240
 -lib hxparse
 -lib unifill
+-cp ${HAXE_LIBCACHE}/mo/0.0.1-alpha/github/88eecd9339079f72c26ce2040e7ddf3ea70d5240/src

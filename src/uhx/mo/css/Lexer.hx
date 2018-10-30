@@ -2,10 +2,10 @@ package uhx.mo.css;
 
 import haxe.io.Eof;
 import uhx.mo.Token;
-import hxparse.Lexer;
 import byte.ByteData;
 import hxparse.Ruleset;
 import haxe.extern.EitherType;
+import hxparse.Lexer as HxparseLexer;
 
 using Std;
 using StringTools;
@@ -69,7 +69,7 @@ enum NthExpressions {
     Notation(a:Int, b:Int, negative:Bool);
 }
  
-@:access(hxparse.Lexer) class Lexer extends hxparse.Lexer {
+@:access(hxparse.Lexer) class Lexer extends HxparseLexer {
 
     public function new(content:ByteData, name:String) {
         super( content, name );
@@ -131,9 +131,9 @@ enum NthExpressions {
         return make(rule.trim(), tokens);
     }
     
-    public static var root = Mo.rules([
-    '[\n\r\t ]*' => lexer.token( root ),
-    '/\\*' => {
+    public static var root:Ruleset<Lexer, Token<CssKeywords>> = Mo.rules([
+    '[\n\r\t ]*' => lexer -> lexer.token( root ),
+    '/\\*' => lexer -> {
         var tokens = [];
         try while ( true ) {
             var token:String = lexer.token( comments );
@@ -148,27 +148,27 @@ enum NthExpressions {
         
         Comment( tokens.join('').trim() );
     },
-    '[^\r\n/@}{]([$selector,"\'/ \\[\\]\\(\\)$s]+$escaped*)+{' => handleRuleSet(lexer, makeRuleSet, BraceClose),
-    '@[$selector \\(\\),]+{' => {
+    '[^\r\n/@}{]([$selector,"\'/ \\[\\]\\(\\)$s]+$escaped*)+{' => lexer -> handleRuleSet(lexer, makeRuleSet, BraceClose),
+    '@[$selector \\(\\),]+{' => lexer -> {
         handleRuleSet(lexer, makeAtRule, BraceClose);
     },
-    declaration => {
+    declaration => lexer -> {
         var tokens = parse(ByteData.ofString(lexer.current), 'declaration', declarations);
         Keyword(Declaration(tokens[0], tokens[1]));
     },
-    '{' => BraceOpen,
-    '}' => BraceClose,
-    ';' => Semicolon,
-    ':' => Colon,
-    '#' => Hash,
-    ',' => Comma,
+    '{' => _ -> BraceOpen,
+    '}' => _ -> BraceClose,
+    ';' => _ -> Semicolon,
+    ':' => _ -> Colon,
+    '#' => _ -> Hash,
+    ',' => _ -> Comma,
     ]);
     
-    public static var comments = Mo.rules([
-    '\\*/' => '*/',
-    '[^*/]+' => lexer.current,
-    '\\*' => '*',
-    '/' => '/',
+    public static var comments:Ruleset<Lexer, String> = Mo.rules([
+    '\\*/' => _ -> '*/',
+    '[^*/]+' => lexer -> lexer.current,
+    '\\*' => _ -> '*',
+    '/' => _ -> '/',
     ]);
     
     private static function handleSelectors(lexer:Lexer, single:Int->CssSelectors) {
@@ -262,27 +262,27 @@ enum NthExpressions {
         return result;
     }
     
-    public static var combinators = Mo.rules([
-    '(.?\u005c\u005c)?' => lexer.token( combinators ),	// reversed escape sequence
-    '[.:\\[]' => None,
-    ' ' => Descendant,
-    '>' => Child,
-    '+' => Adjacent,
-    '~' => General,
-    '>>>' => Shadow,
+    public static var combinators:Ruleset<Lexer, CombinatorType> = Mo.rules([
+    '(.?\u005c\u005c)?' => lexer -> lexer.token( combinators ),	// reversed escape sequence
+    '[.:\\[]' => _ -> None,
+    ' ' => _ -> Descendant,
+    '>' => _ -> Child,
+    '+' => _ -> Adjacent,
+    '~' => _ -> General,
+    '>>>' => _ -> Shadow,
     ]);
     
     public static var scoped:Bool = false;
     
-    public static var selectors = Mo.rules([
+    public static var selectors:Ruleset<Lexer, CssSelectors> = Mo.rules([
     //',' => lexer.token( selectors ),
-    ' +' => lexer.token( selectors ),
-    '/\\*[^\\*]*\\*/' => lexer.token( selectors ),
-    '[\t\r\n]+' => lexer.token( selectors ),
-    '\\*$combinator$comma' => {
+    ' +' => lexer -> lexer.token( selectors ),
+    '/\\*[^\\*]*\\*/' => lexer -> lexer.token( selectors ),
+    '[\t\r\n]+' => lexer -> lexer.token( selectors ),
+    '\\*$combinator$comma' => lexer -> {
         handleSelectors(lexer, function(_) return Universal);
     },
-    '([$ident]+$escaped*)+$combinator$comma' => {
+    '([$ident]+$escaped*)+$combinator$comma' => lexer -> {
         var current = lexer.current.trim();
         var name = ['.'.code, ':'.code].indexOf(current.charCodeAt(current.length - 1)) > -1 
             ? current.substring(0, current.length - 1).trim() 
@@ -292,13 +292,13 @@ enum NthExpressions {
             return Type( i > 0 ? name.substring(0, i).rtrim() : name );
         } );
     },
-    '#([$ident]+$escaped*)+$combinator$comma' => {
+    '#([$ident]+$escaped*)+$combinator$comma' => lexer -> {
         var name = lexer.current;
         handleSelectors(lexer, function(i) {
             return ID( i > -1 ? name.substring(1, i).rtrim() : name.substring(1, name.length) );
         } );
     },
-    '([\t\r\n]*\\.([$ident]+$escaped*)+)+$combinator$comma' => {
+    '([\t\r\n]*\\.([$ident]+$escaped*)+)+$combinator$comma' => lexer -> {
         var parts = [];
         
         if (lexer.current.lastIndexOf('.') != 0) {
@@ -317,7 +317,7 @@ enum NthExpressions {
         } );
     },
     //'::?([$ident]+$escaped*)+[ ]*(\\([^\\(\\)]*\\))?($combinator)' => {
-    '::?([$ident]+$escaped*)+[ ]*\\(?' => {
+    '::?([$ident]+$escaped*)+[ ]*\\(?' => lexer -> {
         var current = lexer.current.trim();
         var name = current.substring(1);
         //trace( current );
@@ -328,7 +328,7 @@ enum NthExpressions {
 
         var tokens = [];
         
-        var inner:Ruleset<EnumValue> = name.startsWith('nth') ? cast nthExpression : cast selectors;
+        var inner:Ruleset<Lexer, EnumValue> = name.startsWith('nth') ? cast nthExpression : cast selectors;
         try while (true) {
             tokens.push( lexer.token( inner ) );
 
@@ -387,7 +387,7 @@ enum NthExpressions {
             return Pseudo(name, expr);
         } );
     },
-    '\\[[$s]*([$ident]+$escaped*)+[$s]*([=~$\\*\\^\\|]+[$s]*[^\r\n\\[\\]]+)?\\]$combinator$comma' => {
+    '\\[[$s]*([$ident]+$escaped*)+[$s]*([=~$\\*\\^\\|]+[$s]*[^\r\n\\[\\]]+)?\\]$combinator$comma' => lexer -> {
         var current = lexer.current;
         //trace(current);
         handleSelectors(lexer, function(i) {
@@ -414,7 +414,7 @@ enum NthExpressions {
         
         (tokens.length == 1)? tokens[0] : CssSelectors.Group(tokens);
     },*/
-    '>' => {
+    '>' => lexer -> {
         if (!scoped) {
             lexer.token( selectors );
 
@@ -438,7 +438,7 @@ enum NthExpressions {
             
         }
     },
-    '\\+' => {
+    '\\+' => lexer -> {
         if (!scoped) {
             lexer.token( selectors );
 
@@ -462,7 +462,7 @@ enum NthExpressions {
             
         }
     },
-    '~' => {
+    '~' => lexer -> {
         if (!scoped) {
             lexer.token( selectors );
 
@@ -489,20 +489,20 @@ enum NthExpressions {
     ]);
 
     public static var pseudoCombinator = Mo.rules([
-    '\\)?$combinator$comma' => {
+    '\\)?$combinator$comma' => _ -> {
         //trace(lexer.current);
         -1;
     }
     ]);
     
-    public static var attributes = Mo.rules([
-    '=' => Exact,
-    '~=' => AttributeType.List,
-    '\\|=' => DashList,
-    '\\^=' => Prefix,
-    '$=' => Suffix,
-    '\\*=' => Contains,
-    '[$s]*[^\t\n\r=~\\$\\|\\^\\*\\[\\]]+[$s]*' => {
+    public static var attributes:Ruleset<Lexer, Any> = Mo.rules([
+    '=' => _ -> Exact,
+    '~=' => _ -> AttributeType.List,
+    '\\|=' => _ -> DashList,
+    '\\^=' => _ -> Prefix,
+    '$=' => _ -> Suffix,
+    '\\*=' => _ -> Contains,
+    '[$s]*[^\t\n\r=~\\$\\|\\^\\*\\[\\]]+[$s]*' => lexer -> {
         var value = lexer.current.trim();
         if (value.startsWith('"') || value.startsWith("'")) value = value.substring(1);
         if (value.endsWith('"') || value.endsWith("'")) value = value.substring(0, value.length - 1);
@@ -510,16 +510,16 @@ enum NthExpressions {
     }
     ]);
     
-    public static var declarations = Mo.rules([
-    '[$ident]+[$s]*:' => {
+    public static var declarations:Ruleset<Lexer, String> = Mo.rules([
+    '[$ident]+[$s]*:' => lexer -> {
         @:privateAccess lexer.pos--;
         lexer.current.substring(0, lexer.current.length - 1).trim();
     },
-    ':[$s]*[^;]+;' => lexer.current.substring(1, lexer.current.length-1).trim(),
+    ':[$s]*[^;]+;' => lexer -> lexer.current.substring(1, lexer.current.length-1).trim(),
     ]);
     
-    public static var mediaQueries = Mo.rules([
-    '([^,]+,[^,]+)+' => {
+    public static var mediaQueries:Ruleset<Lexer, CssMedia> = Mo.rules([
+    '([^,]+,[^,]+)+' => lexer -> {
         var tokens = [];
         
         for (part in lexer.current.split(',')) {
@@ -528,16 +528,16 @@ enum NthExpressions {
         
         CssMedia.Group(tokens);
     },
-    '(n|N)(o|O)(t|T)' => Not,
-    '(o|O)(n|N)(l|L)(y|Y)' => Only,
+    '(n|N)(o|O)(t|T)' => _ -> Not,
+    '(o|O)(n|N)(l|L)(y|Y)' => _ -> Only,
     //'(a|A)(n|N)(d|D)|(a|A)(l|L)+' => lexer.token( mediaQueries ),
-    '[$ident]+' => Feature(lexer.current),
-    '[$ident]+[$s]*:[$s]*[$ident]+' => {
+    '[$ident]+' => lexer -> Feature(lexer.current),
+    '[$ident]+[$s]*:[$s]*[$ident]+' => lexer -> {
         var current = lexer.current;
         var parts = current.split(':');
         CssMedia.Expr(parts[0].trim(), parts[1].trim());
     },
-    '\\(' => {
+    '\\(' => lexer -> {
         var tokens = [];
         try while (true) {
             var token = lexer.token( mediaQueries );
@@ -554,15 +554,15 @@ enum NthExpressions {
         
         tokens[0];
     },
-    '\\)' => Feature(')'),
-    '[ :,]' => lexer.token( mediaQueries ),
+    '\\)' => _ -> Feature(')'),
+    '[ :,]' => lexer -> lexer.token( mediaQueries ),
     ]);
     
-    public static var nthExpression = Mo.rules([
-        '[$s]*' => lexer.token( nthExpression ),
-        'odd' => Notation(2, 1, false),
-        'even' => Notation(2, 0, false),
-        '[0-9]*n' => {
+    public static var nthExpression:Ruleset<Lexer, NthExpressions> = Mo.rules([
+        '[$s]*' => lexer -> lexer.token( nthExpression ),
+        'odd' => _ -> Notation(2, 1, false),
+        'even' => _ -> Notation(2, 0, false),
+        '[0-9]*n' => lexer -> {
             var a = lexer.current.substring(0, lexer.current.length-1).parseInt();
             var b = try lexer.token( nthExpression ) catch(e:Any) Index(0);
             var r = Notation(a != null ? a : 1, switch b {
@@ -571,20 +571,20 @@ enum NthExpressions {
             }, false);
             r;
         },
-        '[0-9]+' => {
+        '[0-9]+' => lexer -> {
             Index(lexer.current.parseInt());
         },
-        '-' => {
+        '-' => lexer -> {
             var r = switch lexer.token( nthExpression ) {
                 case Index(v): Index(-v);
                 case Notation(a, b, n): Notation(a, b, true);
             }
             r;
         },
-        '+' => lexer.token( nthExpression ),
+        '+' => lexer -> lexer.token( nthExpression ),
     ]);
     
-    private static function parse<T>(value:ByteData, name:String, rule:Ruleset<T>):Array<T> {
+    private static function parse<T>(value:ByteData, name:String, rule:Ruleset<Lexer, T>):Array<T> {
         var lexer = new Lexer(value, name);
         var tokens = [];
         
